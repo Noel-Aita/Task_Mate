@@ -39,8 +39,10 @@ class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'description']
+    search_fields = ['title', 'description', 'status', 'priority', 'location']
+    ordering_fields = ['created_at', 'updated_at', 'due_date', 'priority', 'status']
     permission_classes = [IsAuthenticated]
+    ordering = ['-created_at']
 
     def get_queryset(self):
         """Filters tasks based on users role, 
@@ -97,9 +99,9 @@ class TaskCategoryViewSet(viewsets.ModelViewSet):
     queryset = TaskCategory.objects.all()
     serializer_class = TaskCategorySerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [filters.SearchFilter,filters.OrderingFilter]
-    search_fields = ['name', 'description']
-    search_fields = ['name', 'id']
+    filter_backends = [filters.SearchFilter,filters.OrderingFilter] #allows both ordering and searching
+    search_fields = ['name', 'description'] 
+    ordering_fields = ['name', 'id']
     ordering = ['name']
 
 class TaskUpdateViewSet(viewsets.ModelViewSet):
