@@ -1,12 +1,15 @@
-# permissions.py
+# tasks/permissions.py
 from rest_framework import permissions
 
-class IsOwnerOrAdmin(permissions.BasePermission):
+class IsTaskOwnerOrAssigned(permissions.BasePermission):
+    """
+    Custom permission:
+    - Task creator can edit/delete
+    - Assigned technician can view/update status
+    """
     def has_object_permission(self, request, view, obj):
-        if request.user.is_staff:
-            return True
-        return obj == request.user
-
-class IsTechnician(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and not request.user.is_staff
+        # SAFE_METHODS are GET, HEAD, OPTIONS
+        if request.method in permissions.SAFE_METHODS:
+            return obj.assigned_to == request.user or obj.created_by == request.user
+        # For editing/deleting
+        return obj.created_by == request.user

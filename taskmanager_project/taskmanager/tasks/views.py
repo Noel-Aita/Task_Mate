@@ -12,6 +12,7 @@ from .serializers import (
 )
 from .permissions import IsOwnerOrAdmin, IsTechnician
 from .filters import TaskFilter
+from .permissions import IsTaskOwnerOrAssigned
 
 User = get_user_model()
 
@@ -43,10 +44,10 @@ class TaskViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = TaskFilter
     filterset_fields = ["status", "priority", "category", "assigned_to"]
-    search_fields = ['title', 'description', 'status', 'priority', 'location']
+    search_fields = ['title', 'description', 'status', 'priority', 'location', 'category_name']
     ordering_fields = ['created_at', 'updated_at', 'due_date', 'priority', 'status']
-    permission_classes = [IsAuthenticated]
-    ordering = ['-created_at']
+    permission_classes = [IsAuthenticated, IsTaskOwnerOrAssigned] ##### permisiion on who can view the tasks
+    ordering = ['-created_at'] ####### check here
 
     def get_queryset(self):
         """Filters tasks based on users role, 
