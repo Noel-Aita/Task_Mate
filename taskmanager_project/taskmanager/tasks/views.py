@@ -1,5 +1,6 @@
 # views.py
 from rest_framework import viewsets, status, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -10,6 +11,7 @@ from .serializers import (
     TaskCategorySerializer, TaskUpdateSerializer, EducationalResourceSerializer
 )
 from .permissions import IsOwnerOrAdmin, IsTechnician
+from .filters import TaskFilter
 
 User = get_user_model()
 
@@ -38,7 +40,9 @@ class UserViewSet(viewsets.ModelViewSet):
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = TaskFilter
+    filterset_fields = ["status", "priority", "category", "assigned_to"]
     search_fields = ['title', 'description', 'status', 'priority', 'location']
     ordering_fields = ['created_at', 'updated_at', 'due_date', 'priority', 'status']
     permission_classes = [IsAuthenticated]
