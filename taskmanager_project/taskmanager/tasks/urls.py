@@ -1,14 +1,22 @@
-# tasks/urls.py
-
+# urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import TaskViewSet  # Import the viewset we just created
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import (
+    UserViewSet, TaskViewSet, TaskCategoryViewSet, 
+    TaskUpdateViewSet, EducationalResourceViewSet
+)
 
-# Create a router and register the TaskViewSet
 router = DefaultRouter()
-router.register(r'tasks', TaskViewSet, basename='task')
+router.register(r'users', UserViewSet)
+router.register(r'tasks', TaskViewSet)
+router.register(r'categories', TaskCategoryViewSet)
+router.register(r'task-updates', TaskUpdateViewSet, basename='taskupdate')
+router.register(r'resources', EducationalResourceViewSet)
 
-# Include the router's URLs
 urlpatterns = [
-    path('', include(router.urls)),  # This will create /tasks/ and related endpoints
+    path('', include(router.urls)),
+    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/register/', UserViewSet.as_view({'post': 'register'}), name='register'),
 ]
