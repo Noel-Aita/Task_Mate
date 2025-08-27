@@ -7,7 +7,8 @@ class TaskFilter(django_filters.FilterSet):
     created_at_before = django_filters.DateTimeFilter(field_name="created_at", lookup_expr="lte")
     due_date_after = django_filters.DateTimeFilter(field_name="due_date", lookup_expr="gte")
     due_date_before = django_filters.DateTimeFilter(field_name="due_date", lookup_expr="lte")
+    category_name = django_filters.CharFilter(field_name="category__name", lookup_expr="icontains")# filter by category name
 
     class Meta:
         model = Task
-        fields = ['status', 'priority', 'created_by', 'assigned_to']
+        fields = ['status', 'priority', 'created_by', 'assigned_to', 'category']
