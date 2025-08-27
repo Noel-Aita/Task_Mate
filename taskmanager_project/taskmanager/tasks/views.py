@@ -10,7 +10,7 @@ from .serializers import (
     UserSerializer, UserRegistrationSerializer, TaskSerializer, 
     TaskCategorySerializer, TaskUpdateSerializer, EducationalResourceSerializer
 )
-from .permissions import IsOwnerOrAdmin, IsTechnician
+###from .permissions import IsOwnerOrAdmin, IsTechnician
 from .filters import TaskFilter
 from .permissions import IsTaskOwnerOrAssigned
 
@@ -108,6 +108,18 @@ class TaskCategoryViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description'] 
     ordering_fields = ['name', 'id']
     ordering = ['name']
+    filterset_fields = ['name']
+    
+    def get_permissions(self):
+        """
+        Only admins can create/update/delete categories.
+        Other users can view (GET) only.
+        """
+        if self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            self.permission_classes = [IsAdminUser]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
 
 class TaskUpdateViewSet(viewsets.ModelViewSet):
     """to see taskupdate model"""
@@ -128,9 +140,19 @@ class TaskUpdateViewSet(viewsets.ModelViewSet):
         serializer.save(updated_by=self.request.user)
 
 class EducationalResourceViewSet(viewsets.ModelViewSet):
+    """
+    API for managing educational resources.
+    Supports filtering, searching, ordering, and automatically sets the added_by user.
+    """
     queryset = EducationalResource.objects.all()
     serializer_class = EducationalResourceSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['resource_type', 'category']  # exact filtering
+    search_fields = ['title', 'description']  # keyword search
+    ordering_fields = ['added_at', 'title']
+    ordering = ['-added_at']  # default: newest first
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        """Automatically set the user who added this resource"""
         serializer.save(added_by=self.request.user)
